@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Color Tunnel</title>
+<meta name="viewport" content="width=device-width">
+<link href="https://rawcdn.githack.com/zackiscool000/MoreDevelopingWithY8/4ae6f79be38f90cb28187ea5ba7cd787525dd741/style.css" rel="stylesheet">
+<link href="https://rawcdn.githack.com/zackiscool000/MoreDevelopingWithY8/013e89b38eeaf68220d779f960b88d65580492e9/2ndstyle.css" rel="stylesheet">
+<link href="https://rawcdn.githack.com/zackiscool000/MoreDevelopingWithY8/fddf16d5833db81182436316c089309422fe8c71/gamebreak.css" rel="stylesheet">
+<script src="https://rawcdn.githack.com/zackiscool000/MoreDevelopingWithY8/2f8bcd2ec6efa06dbc7eb1fda0961d6001b5e85c/lib.js" type="text/javascript"></script>
+<script src="https://rawcdn.githack.com/zackiscool000/MoreDevelopingWithY8/cc8a4d062dec16044229febd17184417993f8693/browser_detector.js" type="text/javascript"></script>
+<script src="https://rawcdn.githack.com/zackiscool000/MoreDevelopingWithY8/3c440e4cca6a26123fe3d0312381711b6880226d/sound_enabler.js" type="text/javascript"></script>
+<script src="https://rawcdn.githack.com/zackiscool000/MoreDevelopingWithY8/05ca173cb6c680ddcd5f0af611d02f975524ad38/metrika.js" type="text/javascript"></script>
+<script src="https://rawcdn.githack.com/zackiscool000/MoreDevelopingWithY8/23e4ec6071d8848a1451a94506de0e8f9c7da10e/gamebreak.js" type="text/javascript"></script>
+<script src="https://rawcdn.githack.com/zackiscool000/MoreDevelopingWithY8/23e4ec6071d8848a1451a94506de0e8f9c7da10e/game.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="unity-container" class="container unity-desktop webgl-content">
+<canvas id="unity-canvas" class="canvas"></canvas>
+<div id="unity-loading-bar" class="loading-bar">
+<div id="unity-logo"></div>
+<div id="unity-progress-bar-empty">
+<div id="unity-progress-bar-full"></div>
+</div>
+</div>
+<div class="footer">
+<div class="unity disable"></div>
+<div class="webgl enable"></div>
+<h1 class="game-name">Color Tunnel</h1>
+<div class="fullscreen" id="unity-fullscreen-button">Maximize</div>
+</div>
+</div>
+<script>
+var container = document.querySelector("#unity-container");
+var canvas = document.querySelector("#unity-canvas");
+var loadingBar = document.querySelector("#unity-loading-bar");
+var progressBarFull = document.querySelector("#unity-progress-bar-full");
+var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+var warningBanner = document.querySelector("#unity-warning");
+
+// Shows a temporary message banner/ribbon for a few seconds, or
+// a permanent error message on top of the canvas if type=='error'.
+// If type=='warning', a yellow highlight color is used.
+// Modify or remove this function to customize the visually presented
+// way that non-critical warnings and error messages are presented to the
+// user.
+function unityShowBanner(msg, type) {
+function updateBannerVisibility() {
+warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+}
+var div = document.createElement('div');
+div.innerHTML = msg;
+warningBanner.appendChild(div);
+if (type == 'error') div.style = 'background: red; padding: 10px;';
+else {
+if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+setTimeout(function() {
+warningBanner.removeChild(div);
+updateBannerVisibility();
+}, 5000);
+}
+updateBannerVisibility();
+}
+
+var buildUrl = "Build";
+var loaderUrl = buildUrl + "/ColorTunnel-2021-y8-v4.loader.js";
+var config = {
+dataUrl: buildUrl + "/ColorTunnel-2021-y8-v4.data.unityweb",
+frameworkUrl: buildUrl + "/ColorTunnel-2021-y8-v4.framework.js.unityweb",
+codeUrl: buildUrl + "/ColorTunnel-2021-y8-v4.wasm.unityweb",
+streamingAssetsUrl: "StreamingAssets",
+companyName: "Color Tunnel",
+productName: "Color Tunnel",
+productVersion: "1.0",
+showBanner: unityShowBanner,
+};
+
+// By default Unity keeps WebGL canvas render target size matched with
+// the DOM size of the canvas element (scaled by window.devicePixelRatio)
+// Set this to false if you want to decouple this synchronization from
+// happening inside the engine, and you would instead like to size up
+// the canvas DOM size and WebGL render target sizes yourself.
+// config.matchWebGLToCanvasSize = false;
+
+if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+// Mobile device style: fill the whole browser client area with the game canvas:
+
+var meta = document.createElement('meta');
+meta.name = 'viewport';
+meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+document.getElementsByTagName('head')[0].appendChild(meta);
+container.className = "unity-mobile";
+
+// To lower canvas resolution on mobile devices to gain some
+// performance, uncomment the following line:
+// config.devicePixelRatio = 1;
+
+canvas.style.width = window.innerWidth + 'px';
+canvas.style.height = window.innerHeight + 'px';
+
+unityShowBanner('WebGL builds are not supported on mobile devices.');
+} else {
+// Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+canvas.style.width = "800px";
+canvas.style.height = "600px";
+}
+
+loadingBar.style.display = "block";
+
+var script = document.createElement("script");
+script.src = loaderUrl;
+script.onload = () => {
+createUnityInstance(canvas, config, (progress) => {
+progressBarFull.style.width = 100 * progress + "%";
+}).then((unityInstance) => {
+window.unityInstance = unityInstance;
+loadingBar.style.display = "none";
+fullscreenButton.onclick = () => {
+unityInstance.SetFullscreen(1);
+};
+}).catch((message) => {
+alert(message);
+});
+};
+document.body.appendChild(script);
+</script>
+</body>
+</html>
